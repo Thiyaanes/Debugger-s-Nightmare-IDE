@@ -17,3 +17,13 @@ A cursed IDE simulator that turns debugging into chaos — run code, face sarcas
 - [ACE Editor](https://ace.c9.io/)
 - Vanilla JS for code emulation and UI interaction
 - Static site deployment on Vercel
+## how to run
+
+How to Run Locally on VS Code
+
+1. Open the project in VS Code.
+2. Install the Live Server extension.
+3. Right-click `index.html` -> Open with Live Server.
+4. The IDE will load in your default browser. Select language, type code, and run it.
+5. Timer and sarcasm features will work automatically.
+

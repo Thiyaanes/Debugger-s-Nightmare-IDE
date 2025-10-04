@@ -1,0 +1,88 @@
+body {
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:#0b0c10;
+  color:#e6eef6;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#111827;
+  padding:10px 16px;
+  color:#fff;
+}
+
+.timer { font-family:'Share Tech Mono', monospace; font-size:14px; }
+
+.container {
+  flex:1;
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:10px;
+  padding:12px;
+}
+
+.editorPane, .outputPane {
+  background:#1f2937;
+  border-radius:8px;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+}
+
+.editorHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+
+.controls { display:flex; gap:6px; }
+
+button {
+  background:#0b1220;
+  color:#fff;
+  border:1px solid #374151;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button.primary { background:#ef4444; border:none; }
+
+select { background:#111827; color:#fff; border-radius:6px; padding:4px 8px; }
+
+#editor { flex:1; border-radius:6px; height:300px; }
+
+.consoleLabel { font-weight:600; margin-bottom:4px; }
+
+#consoleLog {
+  background:#000;
+  color:#9fb1d0;
+  font-family:'Share Tech Mono', monospace;
+  padding:8px;
+  border-radius:6px;
+  height:100px;
+  overflow:auto;
+  white-space:pre-wrap;
+}
+
+#outputBox {
+  flex:1;
+  background:#0b0c10;
+  margin-top:8px;
+  border-radius:6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  text-align:center;
+  padding:10px;
+}
+
+.sarcastic { color:#ff4d6d; margin-bottom:6px; font-size:18px; text-align:center; }
+
+.correctMsg { color:#ffd700; margin-bottom:6px; font-weight:bold; text-align:center; }
+
+.correctOutput { color:#00ff91; font-family:'Share Tech Mono', monospace; text-align:center; width:100%; white-space:pre-wrap; }

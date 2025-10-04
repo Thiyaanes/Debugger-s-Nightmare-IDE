@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Debugger's Nightmare IDE</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <div>🐛 Debugger's Nightmare — Sarcastic IDE</div>
+  <div class="timer">⏳ <span id="countdown">15</span>s</div>
+</header>
+
+<div class="container">
+  <div class="editorPane">
+    <div class="editorHeader">
+      <select id="langSelect">
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="cpp">C++</option>
+      </select>
+      <div class="controls">
+        <button id="runBtn" class="primary">Run</button>
+        <button id="giveUpBtn">Give Up</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </div>
+    <div id="editor"></div>
+    <div class="consoleLabel">Console</div>
+    <div id="consoleLog">Ready for chaos...</div>
+  </div>
+
+  <div class="outputPane">
+    <strong>Output</strong>
+    <div id="outputBox">Nothing yet. Try running or giving up 😈</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/theme-monokai.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/mode-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/mode-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/mode-c_cpp.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

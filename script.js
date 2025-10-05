@@ -1,7 +1,7 @@
 const starter = {
   javascript:`// JS Starter\nconsole.log("Hello Chaos!");`,
   python:`# Python Starter\nprint("Hello Chaos!")`,
-  cpp:`// C++ Starter\n#include <iostream>\nusing namespace std;\nint main(){ \ncout<<"Hello Chaos!"; \nreturn 0; \n}`
+  cpp:`// C++ Starter\n#include <iostream>\nusing namespace std;\nint main(){ \n\tcout<<"Hello Chaos!"; \n\treturn 0; \n}`
 };
 
 const errors = [ 
@@ -32,10 +32,10 @@ const logEl=document.getElementById("consoleLog");
 const outputBox=document.getElementById("outputBox");
 const langSelect=document.getElementById("langSelect");
 
-const editor=ace.edit("editor");
+const editor = ace.edit("editor");
 editor.setTheme("ace/theme/monokai");
-editor.setValue(starter.javascript,-1);
-editor.session.setMode("ace/mode/javascript");
+editor.session.setMode("ace/mode/python");
+editor.setValue(starter.python, -1);
 
 let currentCode = starter.javascript;
 

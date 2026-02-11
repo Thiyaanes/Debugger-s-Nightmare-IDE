@@ -26,8 +26,8 @@ const sarcasm = [
   "Error: You're too optimistic."
 ];
 
-let countdown = 15,
-  timer;
+let countdown = 15;
+let timer;
 const cdEl = document.getElementById("countdown");
 const logEl = document.getElementById("consoleLog");
 const outputBox = document.getElementById("outputBox");
@@ -38,11 +38,44 @@ editor.setTheme("ace/theme/monokai");
 editor.session.setMode("ace/mode/python");
 editor.setValue(starter.python, -1);
 
-let currentCode = starter.python;
+let baseCode = starter.python;
+let isCorrupted = false;
+let suppressChange = false;
+
+function setEditorValue(value) {
+  suppressChange = true;
+  editor.setValue(value, -1);
+  suppressChange = false;
+}
 
 function log(msg) {
-  logEl.innerHTML += "\n" + msg;
+  if (logEl.textContent.length > 0) {
+    logEl.textContent += "\n";
+  }
+  logEl.textContent += msg;
   logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setOutputPlaceholder() {
+  outputBox.textContent = "Nothing yet. Try running or giving up 😈";
+}
+
+function setOutput(message, output, messageClass) {
+  outputBox.innerHTML = "";
+  if (message) {
+    const msgEl = document.createElement("div");
+    if (messageClass) {
+      msgEl.className = messageClass;
+    }
+    msgEl.textContent = message;
+    outputBox.appendChild(msgEl);
+  }
+  if (output !== undefined && output !== null && output !== "") {
+    const outEl = document.createElement("div");
+    outEl.className = "correctOutput";
+    outEl.textContent = String(output);
+    outputBox.appendChild(outEl);
+  }
 }
 
 function startTimer() {
@@ -65,19 +98,99 @@ function corruptCode(code) {
   return code.slice(0, pos) + insert + code.slice(pos);
 }
 
-// C++ emulation (remains as is)
 function emulateCpp(code) {
   let output = "";
-  code.split("\n").forEach(l => {
-    if (l.includes("cout<<")) {
-      let val = l.split("<<")[1].replace(/;/g, "").replace(/"/g, "");
+  code.split("\n").forEach((line) => {
+    if (line.includes("cout<<")) {
+      const val = line
+        .split("<<")[1]
+        .replace(/;/g, "")
+        .replace(/"/g, "");
       output += val + "\n";
     }
   });
-  return output;
+  return output.trim();
 }
 
-// Run code logic
+function runJavascript(code) {
+  const logs = [];
+  const original = {
+    log: console.log,
+    warn: console.warn,
+    error: console.error
+  };
+
+  const push = (prefix, args) => {
+    const parts = args.map((arg) =>
+      typeof arg === "string" ? arg : JSON.stringify(arg)
+    );
+    logs.push(prefix + parts.join(" "));
+  };
+
+  console.log = (...args) => push("", args);
+  console.warn = (...args) => push("Warn: ", args);
+  console.error = (...args) => push("Error: ", args);
+
+  try {
+    const fn = new Function(code);
+    const result = fn();
+    if (result !== undefined) {
+      logs.push(String(result));
+    }
+  } catch (e) {
+    logs.push(e.toString());
+  } finally {
+    console.log = original.log;
+    console.warn = original.warn;
+    console.error = original.error;
+  }
+
+  return logs.join("\n");
+}
+
+function skulptRead(path) {
+  if (window.Sk && Sk.builtinFiles && Sk.builtinFiles.files[path]) {
+    return Sk.builtinFiles.files[path];
+  }
+  throw new Error("File not found: " + path);
+}
+
+async function runPython(code) {
+  if (window.Sk) {
+    let output = "";
+    Sk.configure({
+      output: (text) => {
+        output += text;
+      },
+      read: skulptRead
+    });
+    try {
+      await Sk.misceval.asyncToPromise(() =>
+        Sk.importMainWithBody("<stdin>", false, code, true)
+      );
+      return output.trim();
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/execute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code })
+    });
+    if (!response.ok) {
+      return `Server error: ${response.status}`;
+    }
+    const data = await response.json();
+    return (data && data.output) || "";
+  } catch (error) {
+    console.error("Fetch error:", error);
+    return "Error connecting to the Python server. Is it running?";
+  }
+}
+
 async function runCode(auto = false) {
   const lang = langSelect.value;
   const code = editor.getValue();
@@ -86,49 +199,34 @@ async function runCode(auto = false) {
     const err = errors[Math.floor(Math.random() * errors.length)];
     const sar = sarcasm[Math.floor(Math.random() * sarcasm.length)];
     log("💥 " + err);
-    outputBox.innerHTML = `<div class="sarcastic">${sar}</div>`;
-    currentCode = code;
-    editor.setValue(corruptCode(code), -1);
-    startTimer();
-  } else {
-    editor.setValue(currentCode, -1);
-    let correctOutput = "";
-    if (lang === "javascript") {
-      try {
-        const F = new Function(currentCode);
-        correctOutput = F() || "";
-      } catch (e) {
-        correctOutput = e.toString();
-      }
-    } else if (lang === "python") {
-      try {
-        // This fetch call requires the Python server (app.py) to be running.
-        const response = await fetch('http://127.0.0.1:5000/execute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            code: currentCode
-          })
-        });
-        const data = await response.json();
-        correctOutput = data.output;
-      } catch (error) {
-        // This error appears if the fetch failed, likely because the server isn't running or because of a CORS issue.
-        correctOutput = "Error connecting to the Python server. Is it running?";
-        console.error("Fetch error:", error);
-      }
-    } else if (lang === "cpp") {
-      correctOutput = emulateCpp(currentCode);
+    setOutput(sar, "", "sarcastic");
+    if (!isCorrupted) {
+      baseCode = code;
     }
-    outputBox.innerHTML = `<div class="correctMsg">Ahhhhhh! I won! Now the output is:</div>
-                         <div class="correctOutput">${correctOutput}</div>`;
-    log("✅ Auto-correct executed, showing real output.");
+    setEditorValue(corruptCode(code));
+    isCorrupted = true;
+    startTimer();
+    return;
   }
+
+  setEditorValue(baseCode);
+  isCorrupted = false;
+  let correctOutput = "";
+
+  if (lang === "javascript") {
+    correctOutput = runJavascript(baseCode);
+  } else if (lang === "python") {
+    correctOutput = await runPython(baseCode);
+  } else if (lang === "cpp") {
+    correctOutput = emulateCpp(baseCode);
+  }
+
+  const displayOutput =
+    correctOutput === "" ? "(no output)" : correctOutput;
+  setOutput("Ahhhhhh! I won! Now the output is:", displayOutput, "correctMsg");
+  log("✅ Auto-correct executed, showing real output.");
 }
 
-// Event listeners
 document.getElementById("runBtn").onclick = () => runCode(false);
 document.getElementById("giveUpBtn").onclick = () => {
   clearInterval(timer);
@@ -139,25 +237,45 @@ document.getElementById("giveUpBtn").onclick = () => {
 document.getElementById("resetBtn").onclick = () => {
   clearInterval(timer);
   const lang = langSelect.value;
-  editor.setValue(starter[lang], -1);
-  editor.session.setMode(lang === "javascript" ? "ace/mode/javascript" : lang === "python" ? "ace/mode/python" : "ace/mode/c_cpp");
-  currentCode = starter[lang];
-  outputBox.innerHTML = "Nothing yet. Try running or giving up 😈";
+  setEditorValue(starter[lang]);
+  editor.session.setMode(
+    lang === "javascript"
+      ? "ace/mode/javascript"
+      : lang === "python"
+      ? "ace/mode/python"
+      : "ace/mode/c_cpp"
+  );
+  baseCode = starter[lang];
+  isCorrupted = false;
+  setOutputPlaceholder();
   cdEl.textContent = "15";
   log("Editor reset. Fresh chaos awaits.");
 };
 
-// Language switch
 langSelect.addEventListener("change", () => {
   clearInterval(timer);
   const lang = langSelect.value;
-  editor.session.setMode(lang === "javascript" ? "ace/mode/javascript" : lang === "python" ? "ace/mode/python" : "ace/mode/c_cpp");
-  editor.setValue(starter[lang], -1);
-  currentCode = starter[lang];
-  outputBox.innerHTML = "Nothing yet. Try running or giving up 😈";
+  editor.session.setMode(
+    lang === "javascript"
+      ? "ace/mode/javascript"
+      : lang === "python"
+      ? "ace/mode/python"
+      : "ace/mode/c_cpp"
+  );
+  setEditorValue(starter[lang]);
+  baseCode = starter[lang];
+  isCorrupted = false;
+  setOutputPlaceholder();
   cdEl.textContent = "15";
   log("Language switched to " + lang.toUpperCase() + ". Prepare for chaos.");
 });
 
-// Initial setup
+editor.session.on("change", () => {
+  if (suppressChange) {
+    return;
+  }
+  baseCode = editor.getValue();
+  isCorrupted = false;
+});
+
 log("Language switched to PYTHON. Prepare for chaos.");

@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -9,7 +10,7 @@ CORS(app)
 
 @app.route('/execute', methods=['POST'])
 def execute_code():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     code = data.get('code', '')
 
     if not code:
@@ -19,7 +20,7 @@ def execute_code():
         # Use subprocess.run to execute the code safely in a new process
         # A timeout is crucial to prevent infinite loops from hanging the server
         result = subprocess.run(
-            ['python', '-c', code],
+            [sys.executable, '-c', code],
             capture_output=True,
             text=True,
             timeout=5  # 5-second timeout

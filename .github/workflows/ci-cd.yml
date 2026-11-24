@@ -1,6 +1,4 @@
 name: Debugger IDE CI/CD
-run_name: ${{ github.actor}}
-
 on:
   push:
     branches:

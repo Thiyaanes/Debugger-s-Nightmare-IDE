@@ -13,7 +13,7 @@ A cursed IDE simulator that turns debugging into chaos — write code, face sarc
 - **Python Emulation:** Supports loops, if/else conditions, nested loops, and array iterations.
 - **Code Editor:** Integrated ACE Editor for an interactive coding experience.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Application
 - HTML5
@@ -31,7 +31,7 @@ A cursed IDE simulator that turns debugging into chaos — write code, face sarc
 - **GitHub Actions** – Automated CI/CD pipeline for building and pushing Docker images.
 - **Nginx** – Frontend web server.
 
-## 📁 Project Structure
+##  Project Structure
 
 ```text
 Debugger-s-Nightmare-IDE/
@@ -56,7 +56,7 @@ Debugger-s-Nightmare-IDE/
 └── README.md
 ```
 
-## 💻 Run Locally
+##  Run Locally
 
 ### Prerequisites
 - Python 3.x
@@ -79,7 +79,7 @@ git clone https://github.com/Thiyaanes/Debugger-s-Nightmare-IDE.git
 
 5. The IDE will open in your browser. Select a language, write code, and run it.
 
-## 🐳 Docker Setup
+##  Docker Setup
 
 This project uses separate Dockerfiles for the frontend and backend.
 
@@ -195,4 +195,4 @@ Navigate to:
 
 Debugger's Nightmare IDE started as a fun browser-based coding simulator and evolved into a containerized application with a DevOps workflow.
 
-The project demonstrates frontend development, Python backend development, Docker containerization, Kubernetes orchestration, and automated CI/CD using GitHub Actions.
+The project demonstrates frontend development, Python backend development, Docker containerization, Kubernetes orchestration and automated CI/CD using GitHub Actions.

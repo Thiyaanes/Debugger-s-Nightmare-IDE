@@ -1,0 +1,91 @@
+# FRONTEND DEPLOYMENT
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debugger-frontend
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: debugger-frontend
+
+  template:
+    metadata:
+      labels:
+        app: debugger-frontend
+
+    spec:
+      containers:
+        - name: debugger-frontend
+          image: thiyaanes/debugger-frontend:v1
+
+          ports:
+            - containerPort: 80
+
+---
+# FRONTEND SERVICE
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: debugger-frontend-service
+
+spec:
+  selector:
+    app: debugger-frontend
+
+  type: NodePort
+
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 32000
+
+---
+# BACKEND DEPLOYMENT
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debugger-backend
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: debugger-backend
+
+  template:
+    metadata:
+      labels:
+        app: debugger-backend
+
+    spec:
+      containers:
+        - name: debugger-backend
+          image: thiyaanes/debugger-backend:v1
+
+          ports:
+            - containerPort: 5000
+
+---
+# BACKEND SERVICE
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: debugger-backend-service
+
+spec:
+  selector:
+    app: debugger-backend
+
+  type: ClusterIP
+
+  ports:
+    - port: 5000
+      targetPort: 5000
